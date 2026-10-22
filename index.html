@@ -48,9 +48,15 @@ dialog video{display:block;width:100%;max-height:86vh}
 .links a:hover{text-decoration:underline;text-underline-offset:6px}
 .skull-wrap{justify-self:end;display:block}
 .skull{display:block;width:auto;height:clamp(84px,11vw,128px);pointer-events:none;user-select:none}
+html.intro-on{overflow:hidden}
+#intro{position:fixed;inset:0;z-index:1000;background:#fff;transition:opacity .45s ease,visibility .45s}
+#intro.out{opacity:0;visibility:hidden}
+#intro video{width:100%;height:100%;object-fit:cover;display:block}
+#skip{position:absolute;right:16px;bottom:16px;background:#000;color:#fff;border:0;padding:8px 14px;font:400 20px/1 var(--disp);letter-spacing:.05em;cursor:pointer}
 </style>
 </head>
 <body>
+<div id="intro" aria-hidden="true"><video id="iv" muted playsinline preload="auto" src="intro.mp4"></video><button id="skip" type="button">SKIP</button></div>
 <header>
   <nav aria-label="Main"><a href="#work">WORK</a><a href="#contact">CONTACT</a></nav>
   <a href="#" aria-label="folk, top of page"><svg class="logo" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="6"><circle cx="32" cy="32" r="26"></circle><path d="M32 18v30"></path><circle cx="32" cy="14" r="3" fill="currentColor" stroke="none"></circle></svg></a>
@@ -119,4 +125,20 @@ dialog video{display:block;width:100%;max-height:86vh}
 </script>
 
 
+<script>
+(function(){
+  var el=document.getElementById('intro'),v=document.getElementById('iv'),root=document.documentElement,done=false;
+  function seen(){try{return sessionStorage.getItem('introSeen')==='1'}catch(e){return false}}
+  function mark(){try{sessionStorage.setItem('introSeen','1')}catch(e){}}
+  function finish(){if(done)return;done=true;mark();el.classList.add('out');root.classList.remove('intro-on');setTimeout(function(){el.remove()},600)}
+  if(seen()||matchMedia('(prefers-reduced-motion:reduce)').matches){el.remove();return}
+  root.classList.add('intro-on');
+  v.addEventListener('ended',finish);v.addEventListener('error',finish);
+  document.getElementById('skip').addEventListener('click',finish);
+  el.addEventListener('click',finish);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'||e.key==='Enter'||e.key===' ')finish()});
+  var p=v.play();if(p&&p.catch)p.catch(finish);
+  setTimeout(finish,5000);
+})();
+</script>
 </body></html>
