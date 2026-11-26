@@ -126,15 +126,18 @@ html.intro-on{overflow:hidden}
   b.addEventListener('click',function(){window.scrollTo({top:0})});
   var tiles=document.querySelectorAll('.tile'),dlg=document.getElementById('dlg'),big=document.getElementById('big');
   var touch=matchMedia('(hover:none)').matches,calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+  var io=('IntersectionObserver' in window)?new IntersectionObserver(function(entries){entries.forEach(function(en){var vid=en.target;if(en.isIntersecting){vid.play().catch(function(){})}else{vid.pause()}})},{threshold:0.25}):null;
   tiles.forEach(function(t){
     var v=t.querySelector('video');
+    var orig=v.getAttribute('src').split('#')[0];
+    if(touch){v.src='mobile/'+orig}
     v.addEventListener('loadeddata',function(){if(v.currentTime===0)v.currentTime=0.05});
-    if(touch&&!calm){v.play().catch(function(){})}
+    if(touch&&!calm){if(io){io.observe(v)}else{v.play().catch(function(){})}}
     else if(!touch){
       t.addEventListener('mouseenter',function(){v.play().catch(function(){})});
       t.addEventListener('mouseleave',function(){v.pause()});
     }
-    function open(){v.pause();big.src=v.currentSrc.split('#')[0];big.muted=false;dlg.showModal();big.play().catch(function(){})}
+    function open(){v.pause();big.src=orig;big.muted=false;dlg.showModal();big.play().catch(function(){})}
     t.addEventListener('click',open);
     t.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
   });
